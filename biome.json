@@ -14,7 +14,9 @@
       "!**/.tsbuild",
       "!**/.turbo",
       "!**/node_modules",
-      "!**/package-lock.json"
+      "!**/package-lock.json",
+      "!**/backend/src/db/migrations/meta",
+      "!**/backend/src/db/generated/catalog.ts"
     ]
   },
   "formatter": {

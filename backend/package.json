@@ -2,7 +2,7 @@
   "name": "@pulseboard/backend",
   "version": "0.0.0",
   "private": true,
-  "description": "Stateless Pulseboard API compile target for Node 20 / Fly.io.",
+  "description": "Stateless Pulseboard API with relational schemas for Node 20 / Fly.io.",
   "type": "module",
   "exports": {
     ".": {
@@ -16,17 +16,23 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -b --pretty false && esbuild src/index.ts --bundle --platform=node --target=node20 --format=esm --outfile=dist/index.js --sourcemap --legal-comments=none",
+    "generate": "tsx src/db/generate-types.ts && drizzle-kit generate",
+    "schema:check": "drizzle-kit check && tsx src/db/validate-schema.ts",
+    "build": "npm run generate && npm run schema:check && tsc -b --pretty false && esbuild src/index.ts --bundle --platform=node --target=node20 --format=esm --outfile=dist/index.js --sourcemap --legal-comments=none",
     "typecheck": "tsc -b --pretty false",
     "lint": "biome check .",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {
-    "@pulseboard/types": "*"
+    "@pulseboard/types": "*",
+    "drizzle-orm": "0.45.2",
+    "postgres": "3.4.9"
   },
   "devDependencies": {
     "@types/node": "20.19.43",
+    "drizzle-kit": "0.31.10",
     "esbuild": "0.28.2",
+    "tsx": "4.23.12",
     "typescript": "5.9.3"
   }
 }

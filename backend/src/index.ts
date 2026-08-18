@@ -1,20 +1,21 @@
 import { pathToFileURL } from "node:url";
 import type { ApiPrefix, RequiredEnvName } from "@pulseboard/types";
 import { API_PREFIX, ENV_NAMES, requiredEnvNames } from "@pulseboard/types";
+import { TABLE_NAMES, type TableName } from "./db/table-names.js";
 
 /**
  * Compile-time contract for the Fly.io Node 20 binary.
  *
- * This package is the bundling and project-reference target for the API.
- * Route handlers, store adapters, and schema validation are later milestones
- * and are intentionally not implemented here. The process never opens a
- * database connection or calls an external scheduler.
+ * Relational schemas, generated persistence types, and Zod contracts are
+ * validated at build time. Route handlers and live store adapters are later
+ * milestones. This process never opens PostgreSQL or calls a scheduler.
  */
 export interface ProcessContract {
   readonly nodeTarget: "20";
   readonly platform: "fly.io";
   readonly apiPrefix: ApiPrefix;
   readonly requiredEnv: readonly RequiredEnvName[];
+  readonly tables: readonly TableName[];
 }
 
 export const processContract: ProcessContract = {
@@ -22,6 +23,7 @@ export const processContract: ProcessContract = {
   platform: "fly.io",
   apiPrefix: API_PREFIX,
   requiredEnv: requiredEnvNames,
+  tables: TABLE_NAMES,
 };
 
 export function describeRuntime(): string {
@@ -30,6 +32,7 @@ export function describeRuntime(): string {
     `node=${processContract.nodeTarget}`,
     `prefix=${processContract.apiPrefix}`,
     `env=${processContract.requiredEnv.join(",")}`,
+    `tables=${processContract.tables.join(",")}`,
   ].join(" ");
 }
 
@@ -42,7 +45,6 @@ export function isDirectEntrypoint(argv1: string | undefined, metaUrl: string): 
 }
 
 function main(): void {
-  // Advertise required names only — never read or default their values.
   process.stdout.write(`${describeRuntime()}\n`);
   process.stdout.write(`database-env=${ENV_NAMES.DATABASE_URL}\n`);
 }
@@ -50,3 +52,21 @@ function main(): void {
 if (isDirectEntrypoint(process.argv[1], import.meta.url)) {
   main();
 }
+
+export type {
+  BlockerRow,
+  NewBlockerRow,
+  NewStandupRow,
+  NewUserRow,
+  NewWeeklyDigestRow,
+  NewWorkspaceMemberRow,
+  NewWorkspaceRow,
+  StandupRow,
+  UserRow,
+  WeeklyDigestRow,
+  WorkspaceMemberRow,
+  WorkspaceRow,
+} from "./db/schema.js";
+export { assertSslModeRequire, resolveDatabaseUrl } from "./db/ssl.js";
+export type { TableName } from "./db/table-names.js";
+export { TABLE_NAMES } from "./db/table-names.js";

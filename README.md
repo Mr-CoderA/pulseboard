@@ -9,7 +9,7 @@ Zone-aware standup tracking as a TypeScript monorepo. The `app` package is a ful
 |------|------|------|
 | `app/` | `@pulseboard/app` | Static SvelteKit UI (Cloudflare Pages) |
 | `backend/` | `@pulseboard/backend` | Node 20 API bundle (Fly.io) |
-| `packages/types/` | `@pulseboard/types` | Shared path, env-name, and RFC 7807 contracts |
+| `packages/types/` | `@pulseboard/types` | Shared Zod payloads, path map, env names, RFC 7807 |
 
 Tooling lives at the repository root: Turborepo (`turbo.json`), Biome (`biome.json`), and a solution-style TypeScript project (`tsconfig.json` + `tsconfig.base.json`).
 
@@ -34,7 +34,7 @@ npm run typecheck  # project references + per-package checks
 npm run lint       # biome check .
 ```
 
-Node 20 or newer is required (`engines.node` and `.nvmrc`).
+Backend `build` also regenerates persistence catalogs, runs `drizzle-kit generate` / `drizzle-kit check`, and executes credential-free Zod/schema alignment checks. Node 20 or newer is required (`engines.node` and `.nvmrc`).
 
 ## Environment
 
@@ -47,8 +47,21 @@ Credentials are injected at deploy time. Copy `.env.example` locally if needed; 
 | `SCHEDULER_KEY` | Auth material for the scheduler provider. |
 | `BETTER_AUTH_SECRET` | Session signing for better-auth. |
 
-This repository does not run a local database, cache, or queue. There is no Docker Compose file; stateful services are provisioned outside the repo.
+Schema generation and validation do not read these values and never open a connection. `DATABASE_URL` is required only when a runtime adapter issues a query. This repository does not run a local database, cache, or queue. There is no Docker Compose file; stateful services are provisioned outside the repo.
+
+## Relational model
+
+PostgreSQL tables are declared in `backend/src/db/schema.ts` (Drizzle) and mirrored by HTTPS Zod contracts in `packages/types/src/schemas.ts`:
+
+- `users`
+- `workspaces`
+- `workspace_members`
+- `standups`
+- `blockers` (`blocker_status`: OPEN / RESOLVED / FLAGGED)
+- `weekly_digests`
+
+SQL migrations live in `backend/src/db/migrations/` and are generated, not applied, during build.
 
 ## Milestone boundary
 
-This commit establishes the workspace, shared lint/packaging config, and the TypeScript reference graph. Relational schemas, API route handlers, and the SvelteKit page/design system land in later milestones.
+This commit adds relational schemas, static type generation, and schema validation in `backend`. API route handlers with mocked stores, and the SvelteKit page/design system, land in later milestones.
