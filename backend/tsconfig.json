@@ -9,5 +9,6 @@
     "lib": ["ES2022"]
   },
   "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts", "src/testing/**"],
   "references": [{ "path": "../packages/types" }]
 }

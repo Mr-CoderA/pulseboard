@@ -31,10 +31,11 @@ Each package emits declarations (`composite` + `declaration`). The API runtime J
 npm install
 npm run build      # turbo pipeline, then tsc -b
 npm run typecheck  # project references + per-package checks
+npm run test       # backend contract tests (also runs during backend build)
 npm run lint       # biome check .
 ```
 
-Backend `build` also regenerates persistence catalogs, runs `drizzle-kit generate` / `drizzle-kit check`, and executes credential-free Zod/schema alignment checks. Node 20 or newer is required (`engines.node` and `.nvmrc`).
+Backend `build` also regenerates persistence catalogs, runs `drizzle-kit generate` / `drizzle-kit check`, executes credential-free Zod/schema alignment checks, and runs unit tests against in-memory store adapters. Node 20 or newer is required (`engines.node` and `.nvmrc`).
 
 ## Environment
 
@@ -64,4 +65,4 @@ SQL migrations live in `backend/src/db/migrations/` and are generated, not appli
 
 ## Milestone boundary
 
-This commit adds relational schemas, static type generation, and schema validation in `backend`. API route handlers with mocked stores, and the SvelteKit page/design system, land in later milestones.
+This commit adds `/api/v1` route handlers on a store port, an in-memory adapter for tests, a Drizzle PostgreSQL adapter (constructed only at runtime), and unit tests that lock request/response contracts. The SvelteKit page/design system remains a later milestone.

@@ -2,7 +2,7 @@
   "name": "@pulseboard/backend",
   "version": "0.0.0",
   "private": true,
-  "description": "Stateless Pulseboard API with relational schemas for Node 20 / Fly.io.",
+  "description": "Stateless Pulseboard API: validated /api/v1 handlers, store ports, Node 20 / Fly.io.",
   "type": "module",
   "exports": {
     ".": {
@@ -18,13 +18,16 @@
   "scripts": {
     "generate": "tsx src/db/generate-types.ts && drizzle-kit generate",
     "schema:check": "drizzle-kit check && tsx src/db/validate-schema.ts",
-    "build": "npm run generate && npm run schema:check && tsc -b --pretty false && esbuild src/index.ts --bundle --platform=node --target=node20 --format=esm --outfile=dist/index.js --sourcemap --legal-comments=none",
+    "test": "tsc -p tsconfig.test.json --pretty false && tsx --test src/auth/passwords.test.ts src/auth/tokens.test.ts src/time/workspace-date.test.ts src/scheduler/cron.test.ts src/routes/contracts.test.ts",
+    "build": "npm run generate && npm run schema:check && tsc -b --pretty false && npm test && esbuild src/index.ts --bundle --platform=node --target=node20 --format=esm --outfile=dist/index.js --sourcemap --legal-comments=none",
     "typecheck": "tsc -b --pretty false",
     "lint": "biome check .",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {
     "@pulseboard/types": "*",
+    "date-fns": "4.1.0",
+    "date-fns-tz": "3.2.0",
     "drizzle-orm": "0.45.2",
     "postgres": "3.4.9"
   },

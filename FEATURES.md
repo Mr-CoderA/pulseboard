@@ -4,11 +4,11 @@ Pulseboard is a zone-aware standup tracker. This repository is a TypeScript mono
 
 ## Product
 
-- **Standup tracking.** Canonical API paths cover daily standups, blocker status, and a weekly digest. Zod schemas reject malformed payloads at the HTTPS boundary.
-- **Workspaces.** Paths exist for listing and creating workspaces. Workspace `timezone` values must be valid IANA identifiers; weekly digest `weekStart` must be a Monday.
-- **Credential auth.** Register and login paths are reserved under `/api/v1/auth`. Session signing is expected via `BETTER_AUTH_SECRET` at deploy time. No auth library is wired in source.
+- **Standup tracking.** Canonical API paths cover daily standups, blocker status, and a weekly digest. Zod schemas reject malformed payloads at the HTTPS boundary before store adapters run.
+- **Workspaces.** List and create workspaces. Workspace `timezone` values must be valid IANA identifiers; weekly digest `weekStart` must be a Monday. Standup `date` is the workspace-local calendar day (`date-fns-tz`), not UTC.
+- **Credential auth.** `POST /api/v1/auth/register` and `POST /api/v1/auth/login` issue short-lived HMAC JWTs signed with `BETTER_AUTH_SECRET`. Every authenticated caller is a `member`. Sessions travel as `Authorization: Bearer` or an HTTP-only `SameSite=Lax` cookie (`pulseboard_session`) and are refreshed near expiry. No third-party OAuth.
 - **Static UI.** `@pulseboard/app` is a prerendered SvelteKit site (adapter-static, `prerender = true`). The current page surfaces the shared API prefix and required environment variable names only.
-- **Stateless API binary.** `@pulseboard/backend` compiles to a Node 20 ESM bundle. The entrypoint advertises its process contract (including table names) and does not bind a server, open PostgreSQL, or call a scheduler.
+- **Stateless API binary.** `@pulseboard/backend` compiles to a Node 20 ESM bundle. Handlers run against a store port; unit tests inject an in-memory adapter. The entrypoint advertises its process contract and does not bind a listen port, open PostgreSQL, or call a scheduler.
 - **Relational schema.** Drizzle tables, checks, unique indexes, and foreign keys model users, workspaces, membership, standups, blockers, and weekly digests. Build-time validation compares the live schema to a generated catalog and to shared Zod entity types.
 
 ## Architecture
@@ -25,20 +25,22 @@ Root tooling: npm workspaces, Turborepo (`turbo.json`), Biome (`biome.json`), so
 
 There is no Docker Compose file. PostgreSQL and the scheduler are external services.
 
-## API contract (`@pulseboard/types`)
+## API contract (`@pulseboard/types` + `@pulseboard/backend`)
 
-Prefix: `/api/v1`.
+Prefix: `/api/v1`. Handlers live in `backend/src/routes`. Payloads are parsed with the shared Zod maps; errors are RFC 7807 Problem Details (`application/problem+json`).
 
-| Path | Role |
-|------|------|
-| `/api/v1/auth/register` | Registration |
-| `/api/v1/auth/login` | Login |
-| `/api/v1/workspaces` | Workspace collection |
-| `/api/v1/standups` | Standup collection |
-| `/api/v1/blockers/:id/status` | Blocker status (`blockerStatusPath`) |
-| `/api/v1/digest/weekly` | Weekly digest |
+| Method | Path | Success |
+|------|------|---------|
+| `POST` | `/api/v1/auth/register` | 201 `{ token }` |
+| `POST` | `/api/v1/auth/login` | 200 `{ token }` |
+| `GET` | `/api/v1/workspaces` | 200 `[Workspace]` |
+| `POST` | `/api/v1/workspaces` | 201 `{ id, name, timezone }` |
+| `POST` | `/api/v1/standups` | 201 `{ id, submittedAt }` |
+| `GET` | `/api/v1/standups?workspaceId=&range=` | 200 `[Standup]` |
+| `PATCH` | `/api/v1/blockers/:id/status` | 200 `{ status }` |
+| `GET` | `/api/v1/digest/weekly?workspaceId=&weekStart=` | 200 `{ velocityScore, unresolvedBlockerCount, compiledMd }` |
 
-These are path constants plus Zod request/response schemas, not live handlers. Error responses are typed as RFC 7807 Problem Details (`type`, `title`, `status`, optional `detail` / `instance`).
+Authenticated routes accept `Authorization: Bearer <token>` or the session cookie. Rate limiting is expected at the edge (sliding window), not in this process.
 
 ## External services
 
@@ -46,6 +48,6 @@ Names only; values come from the host. Recorded in `.env.example` and `ENV_NAMES
 
 - `DATABASE_URL` — PostgreSQL; connections must use `sslmode=require`
 - `SCHEDULER_ENDPOINT` / `SCHEDULER_KEY` — external cron/queue (digest compilation, prompt delivery)
-- `BETTER_AUTH_SECRET` — session signing material
+- `BETTER_AUTH_SECRET` — HMAC material for session JWTs
 
-`drizzle-kit generate` / `drizzle-kit check` and `backend` schema validation never read these values and never connect.
+`drizzle-kit generate` / `drizzle-kit check`, schema validation, and unit tests never read these values (tests inject a store and a token secret). They never connect.

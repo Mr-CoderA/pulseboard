@@ -4,11 +4,10 @@ import { API_PREFIX, ENV_NAMES, requiredEnvNames } from "@pulseboard/types";
 import { TABLE_NAMES, type TableName } from "./db/table-names.js";
 
 /**
- * Compile-time contract for the Fly.io Node 20 binary.
+ * Compile-time and HTTP contract for the Fly.io Node 20 binary.
  *
- * Relational schemas, generated persistence types, and Zod contracts are
- * validated at build time. Route handlers and live store adapters are later
- * milestones. This process never opens PostgreSQL or calls a scheduler.
+ * Route handlers sit on a store port. Unit tests inject the in-memory adapter.
+ * This process never opens PostgreSQL or calls a scheduler.
  */
 export interface ProcessContract {
   readonly nodeTarget: "20";
@@ -53,6 +52,16 @@ if (isDirectEntrypoint(process.argv[1], import.meta.url)) {
   main();
 }
 
+export { type CookiePolicy, SESSION_COOKIE_NAME } from "./auth/cookies.js";
+export { createScryptHasher, type PasswordHasher } from "./auth/passwords.js";
+export {
+  createTokenService,
+  DEFAULT_REFRESH_WITHIN_SECONDS,
+  DEFAULT_TOKEN_TTL_SECONDS,
+  type TokenClaims,
+  type TokenService,
+} from "./auth/tokens.js";
+export { type Clock, FrozenClock, systemClock } from "./clock.js";
 export type {
   BlockerRow,
   NewBlockerRow,
@@ -70,3 +79,16 @@ export type {
 export { assertSslModeRequire, resolveDatabaseUrl } from "./db/ssl.js";
 export type { TableName } from "./db/table-names.js";
 export { TABLE_NAMES } from "./db/table-names.js";
+export { type App, type AppDependencies, createApp, type IncomingDispatch } from "./http/app.js";
+export { readAuthSecret } from "./http/errors.js";
+export { createNodeListener } from "./http/node.js";
+export type { DispatchHeaders, DispatchResult } from "./http/response.js";
+export {
+  createSchedulerPort,
+  readSchedulerConfig,
+  SCHEDULER_JOBS,
+  type SchedulerPort,
+} from "./scheduler/cron.js";
+export { createMemoryStore, MemoryStore } from "./store/memory.js";
+export type { Store } from "./store/port.js";
+export { calendarDateInZone } from "./time/workspace-date.js";
