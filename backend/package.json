@@ -15,11 +15,16 @@
   "files": [
     "dist"
   ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "generate": "tsx src/db/generate-types.ts && drizzle-kit generate",
     "schema:check": "drizzle-kit check && tsx src/db/validate-schema.ts",
     "test": "tsc -p tsconfig.test.json --pretty false && tsx --test src/auth/passwords.test.ts src/auth/tokens.test.ts src/time/workspace-date.test.ts src/scheduler/cron.test.ts src/routes/contracts.test.ts",
+    "prebuild": "npm run build --prefix ../packages/types",
     "build": "npm run generate && npm run schema:check && tsc -b --pretty false && npm test && esbuild src/index.ts --bundle --platform=node --target=node20 --format=esm --outfile=dist/index.js --sourcemap --legal-comments=none",
+    "start": "node dist/index.js",
     "typecheck": "tsc -b --pretty false",
     "lint": "biome check .",
     "clean": "rm -rf dist *.tsbuildinfo"
