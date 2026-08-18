@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "rootDir": "./src",
+    "outDir": "./.tsbuild/app",
+    "tsBuildInfoFile": "./.tsbuild/app/tsconfig.tsbuildinfo",
+    "emitDeclarationOnly": true,
+    "types": [],
+    "verbatimModuleSyntax": true
+  },
+  "include": ["src/lib/**/*.ts", "src/routes/**/*.ts"],
+  "references": [{ "path": "../packages/types" }]
+}

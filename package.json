@@ -1,0 +1,35 @@
+{
+  "name": "pulseboard",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Zone-aware standup tracking: a static SvelteKit edge app and a lean Node 20 API sharing TypeScript contracts.",
+  "type": "module",
+  "packageManager": "npm@11.17.0",
+  "devEngines": {
+    "packageManager": {
+      "name": "npm",
+      "version": ">=10"
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "app",
+    "backend",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build && tsc -b --pretty false",
+    "dev": "turbo run dev",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "typecheck": "tsc -b --pretty false && turbo run typecheck",
+    "clean": "turbo run clean && rm -rf .turbo"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.9",
+    "turbo": "2.10.11",
+    "typescript": "5.9.3"
+  }
+}

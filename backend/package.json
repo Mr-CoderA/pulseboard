@@ -1,0 +1,32 @@
+{
+  "name": "@pulseboard/backend",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Stateless Pulseboard API compile target for Node 20 / Fly.io.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b --pretty false && esbuild src/index.ts --bundle --platform=node --target=node20 --format=esm --outfile=dist/index.js --sourcemap --legal-comments=none",
+    "typecheck": "tsc -b --pretty false",
+    "lint": "biome check .",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@pulseboard/types": "*"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.43",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}

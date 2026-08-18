@@ -1,0 +1,9 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/types" },
+    { "path": "./backend" },
+    { "path": "./app/tsconfig.app.json" },
+    { "path": "./app/tsconfig.node.json" }
+  ]
+}

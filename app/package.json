@@ -1,0 +1,29 @@
+{
+  "name": "@pulseboard/app",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Static SvelteKit app for Pulseboard, built for Cloudflare Pages.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "prepare": "svelte-kit sync",
+    "typecheck": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "lint": "biome check .",
+    "clean": "rm -rf build .svelte-kit .tsbuild"
+  },
+  "dependencies": {
+    "@pulseboard/types": "*"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-static": "3.0.10",
+    "@sveltejs/kit": "2.70.3",
+    "@sveltejs/vite-plugin-svelte": "7.3.0",
+    "svelte": "5.56.9",
+    "@types/node": "20.19.43",
+    "svelte-check": "4.7.6",
+    "typescript": "5.9.3",
+    "vite": "8.2.1"
+  }
+}
