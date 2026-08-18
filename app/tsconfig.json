@@ -11,5 +11,6 @@
     "strict": true,
     "moduleResolution": "bundler",
     "verbatimModuleSyntax": true
-  }
+  },
+  "exclude": ["test", "build"]
 }

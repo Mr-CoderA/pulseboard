@@ -7,11 +7,13 @@ export const ENV_NAMES: {
   readonly SCHEDULER_ENDPOINT: "SCHEDULER_ENDPOINT";
   readonly SCHEDULER_KEY: "SCHEDULER_KEY";
   readonly BETTER_AUTH_SECRET: "BETTER_AUTH_SECRET";
+  readonly PUBLIC_API_ORIGIN: "PUBLIC_API_ORIGIN";
 } = {
   DATABASE_URL: "DATABASE_URL",
   SCHEDULER_ENDPOINT: "SCHEDULER_ENDPOINT",
   SCHEDULER_KEY: "SCHEDULER_KEY",
   BETTER_AUTH_SECRET: "BETTER_AUTH_SECRET",
+  PUBLIC_API_ORIGIN: "PUBLIC_API_ORIGIN",
 };
 
 export type EnvName = (typeof ENV_NAMES)[keyof typeof ENV_NAMES];
@@ -24,3 +26,6 @@ export const requiredEnvNames: readonly EnvName[] = [
 ];
 
 export type RequiredEnvName = (typeof requiredEnvNames)[number];
+
+/** Browser-exposed names for the static app. Never used as credential fallbacks. */
+export const publicEnvNames: readonly EnvName[] = [ENV_NAMES.PUBLIC_API_ORIGIN];

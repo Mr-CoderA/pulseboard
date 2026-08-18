@@ -23,11 +23,11 @@ npm run build      # turbo run build && tsc -b
 npm run typecheck  # tsc -b && per-package typecheck (svelte-check in app)
 npm run lint       # biome check .
 npm run format     # biome check --write .
-npm run test       # backend contract tests (also part of backend build)
+npm run test       # backend contracts + app route/token assertions
 npm run clean
 ```
 
-Turbo `build` is `dependsOn: ["^build"]`, so `@pulseboard/types` emits before app and backend. App build is `vite build` (adapter-static → `app/build`). Backend build is:
+Turbo `build` is `dependsOn: ["^build"]`, so `@pulseboard/types` emits before app and backend. App build is `svelte-check`, `vite build` (adapter-static → `app/build`), then Node tests that assert CSS tokens, route files, and prerendered HTML. Backend build is:
 
 1. `tsx src/db/generate-types.ts` (persistence catalog + row interfaces)
 2. `drizzle-kit generate` (SQL migrations; no-op when the schema is unchanged)
@@ -50,7 +50,7 @@ Route handlers are exercised with `createMemoryStore` and an injected token secr
 
 - List required variable **names** in `.env.example` and `ENV_NAMES`. Never commit values. `.gitignore` ignores `.env` and `.env.*` except `.env.example`.
 - Do not invent fallback credentials, default secrets, or local service URLs in source.
-- Do not read `DATABASE_URL`, `SCHEDULER_KEY`, or `BETTER_AUTH_SECRET` into runtime defaults. The backend entrypoint prints names only and must not open a database or scheduler connection. Token signing and the PostgreSQL adapter receive those values only when a caller injects them.
+- Do not read `DATABASE_URL`, `SCHEDULER_KEY`, `BETTER_AUTH_SECRET`, or `PUBLIC_API_ORIGIN` into runtime defaults. The backend entrypoint prints names only and must not open a database or scheduler connection. The static app client refuses to fetch when `PUBLIC_API_ORIGIN` is unset. Token signing and the PostgreSQL adapter receive those values only when a caller injects them.
 - PostgreSQL must use `sslmode=require` when a connection is added. `assertSslModeRequire` enforces that on the URL before the adapter is constructed.
 - Do not bake secrets into build artifacts. `BETTER_AUTH_SECRET` is deploy-time signing material, not a committed key.
 

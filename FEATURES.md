@@ -7,7 +7,7 @@ Pulseboard is a zone-aware standup tracker. This repository is a TypeScript mono
 - **Standup tracking.** Canonical API paths cover daily standups, blocker status, and a weekly digest. Zod schemas reject malformed payloads at the HTTPS boundary before store adapters run.
 - **Workspaces.** List and create workspaces. Workspace `timezone` values must be valid IANA identifiers; weekly digest `weekStart` must be a Monday. Standup `date` is the workspace-local calendar day (`date-fns-tz`), not UTC.
 - **Credential auth.** `POST /api/v1/auth/register` and `POST /api/v1/auth/login` issue short-lived HMAC JWTs signed with `BETTER_AUTH_SECRET`. Every authenticated caller is a `member`. Sessions travel as `Authorization: Bearer` or an HTTP-only `SameSite=Lax` cookie (`pulseboard_session`) and are refreshed near expiry. No third-party OAuth.
-- **Static UI.** `@pulseboard/app` is a prerendered SvelteKit site (adapter-static, `prerender = true`). The current page surfaces the shared API prefix and required environment variable names only.
+- **Static UI.** `@pulseboard/app` is a prerendered SvelteKit site (adapter-static, `prerender = true`). Routes cover `/auth/login`, `/auth/register`, and `/:workspace/{dashboard,standup,history,lead/summary}`. Theming is a CSS custom-property pipeline (Inter + IBM Plex Mono, 8px scale, `#2563eb` accent). Workspace pages prerender the Atlas preview fixtures; the API client requires `PUBLIC_API_ORIGIN` at runtime and has no local fallback.
 - **Stateless API binary.** `@pulseboard/backend` compiles to a Node 20 ESM bundle. Handlers run against a store port; unit tests inject an in-memory adapter. The entrypoint advertises its process contract and does not bind a listen port, open PostgreSQL, or call a scheduler.
 - **Relational schema.** Drizzle tables, checks, unique indexes, and foreign keys model users, workspaces, membership, standups, blockers, and weekly digests. Build-time validation compares the live schema to a generated catalog and to shared Zod entity types.
 
@@ -49,5 +49,6 @@ Names only; values come from the host. Recorded in `.env.example` and `ENV_NAMES
 - `DATABASE_URL` — PostgreSQL; connections must use `sslmode=require`
 - `SCHEDULER_ENDPOINT` / `SCHEDULER_KEY` — external cron/queue (digest compilation, prompt delivery)
 - `BETTER_AUTH_SECRET` — HMAC material for session JWTs
+- `PUBLIC_API_ORIGIN` — HTTPS origin of the API, read by the static app (no default)
 
 `drizzle-kit generate` / `drizzle-kit check`, schema validation, and unit tests never read these values (tests inject a store and a token secret). They never connect.

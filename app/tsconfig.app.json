@@ -11,6 +11,6 @@
     "types": [],
     "verbatimModuleSyntax": true
   },
-  "include": ["src/lib/**/*.ts", "src/routes/**/*.ts"],
+  "include": ["src/lib/**/*.ts", "src/routes/**/*.ts", "src/params/**/*.ts"],
   "references": [{ "path": "../packages/types" }]
 }

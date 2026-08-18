@@ -2,7 +2,7 @@
 
 declare global {
   namespace App {
-    // Surface reserved for later milestones (session locals, Cloudflare platform).
+    // Session locals and Cloudflare platform bindings land in later runtime work.
   }
 }
 

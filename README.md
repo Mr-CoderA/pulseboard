@@ -31,7 +31,7 @@ Each package emits declarations (`composite` + `declaration`). The API runtime J
 npm install
 npm run build      # turbo pipeline, then tsc -b
 npm run typecheck  # project references + per-package checks
-npm run test       # backend contract tests (also runs during backend build)
+npm run test       # backend contract tests + app static-route assertions
 npm run lint       # biome check .
 ```
 
@@ -47,6 +47,7 @@ Credentials are injected at deploy time. Copy `.env.example` locally if needed; 
 | `SCHEDULER_ENDPOINT` | External cron/queue provider (digest compilation, prompts). |
 | `SCHEDULER_KEY` | Auth material for the scheduler provider. |
 | `BETTER_AUTH_SECRET` | Session signing for better-auth. |
+| `PUBLIC_API_ORIGIN` | HTTPS origin of the API, used by the static app. No local fallback. |
 
 Schema generation and validation do not read these values and never open a connection. `DATABASE_URL` is required only when a runtime adapter issues a query. This repository does not run a local database, cache, or queue. There is no Docker Compose file; stateful services are provisioned outside the repo.
 
@@ -65,4 +66,4 @@ SQL migrations live in `backend/src/db/migrations/` and are generated, not appli
 
 ## Milestone boundary
 
-This commit adds `/api/v1` route handlers on a store port, an in-memory adapter for tests, a Drizzle PostgreSQL adapter (constructed only at runtime), and unit tests that lock request/response contracts. The SvelteKit page/design system remains a later milestone.
+This commit adds the static SvelteKit UI: page components, a CSS custom-property theme pipeline, prerendered routes (including `/atlas/*` workspace desks), and Node tests that assert those routes and tokens. The API remains the existing `/api/v1` handlers; the browser client does not call a live origin at build time.
