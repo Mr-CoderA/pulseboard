@@ -8,7 +8,7 @@ import type {
   CreateWorkspaceRequest,
   CreateWorkspaceResponse,
   ProblemDetails,
-  Standup,
+  StandupListEntry,
   WeeklyDigestResponse,
   Workspace,
 } from "@pulseboard/types";
@@ -65,7 +65,7 @@ export interface ApiClient {
   listWorkspaces(): Promise<Workspace[]>;
   createWorkspace(body: CreateWorkspaceRequest): Promise<CreateWorkspaceResponse>;
   createStandup(body: CreateStandupRequest): Promise<CreateStandupResponse>;
-  listStandups(workspaceId: string, range: string): Promise<Standup[]>;
+  listStandups(workspaceId: string, range: string): Promise<StandupListEntry[]>;
   updateBlockerStatus(id: string, status: BlockerStatus): Promise<BlockerStatusResponse>;
   weeklyDigest(workspaceId: string, weekStart: string): Promise<WeeklyDigestResponse>;
 }
@@ -108,7 +108,7 @@ class UnconfiguredClient implements ApiClient {
   createStandup(): Promise<CreateStandupResponse> {
     return Promise.reject(new MissingApiOriginError());
   }
-  listStandups(): Promise<Standup[]> {
+  listStandups(): Promise<StandupListEntry[]> {
     return Promise.reject(new MissingApiOriginError());
   }
   updateBlockerStatus(): Promise<BlockerStatusResponse> {
@@ -166,7 +166,7 @@ class HttpApiClient implements ApiClient {
     );
   }
 
-  listStandups(workspaceId: string, range: string): Promise<Standup[]> {
+  listStandups(workspaceId: string, range: string): Promise<StandupListEntry[]> {
     const query = standupListQuerySchema.parse({ workspaceId, range });
     const path = `${endpoints.standups}?workspaceId=${encodeURIComponent(query.workspaceId)}&range=${encodeURIComponent(query.range)}`;
     return this.send("GET", path, standupListSchema);

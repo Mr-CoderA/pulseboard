@@ -1,3 +1,4 @@
+import { isMondayUtc, weekStartSchema } from "@pulseboard/types";
 import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 
 /** Inclusive local-hour window during which a standup may be filed. */
@@ -24,6 +25,51 @@ export function workspaceClock(timezone: string, now: Date): WorkspaceClock {
     hour,
     windowOpen: hour >= STANDUP_WINDOW.startHour && hour < STANDUP_WINDOW.endHour,
   };
+}
+
+export function workspaceLocalToday(timezone: string, now: Date): string {
+  return formatInTimeZone(now, timezone, "yyyy-MM-dd");
+}
+
+export function shiftIsoDate(isoDate: string, days: number): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate);
+  if (match === null) {
+    throw new Error("isoDate must be YYYY-MM-DD");
+  }
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const utc = new Date(Date.UTC(year, month - 1, day + days));
+  const yyyy = String(utc.getUTCFullYear()).padStart(4, "0");
+  const mm = String(utc.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(utc.getUTCDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+export function standupDateRange(from: string, to: string): string {
+  return `${from}/${to}`;
+}
+
+export function dashboardStandupRange(timezone: string, now: Date, lookbackDays = 14): string {
+  const today = workspaceLocalToday(timezone, now);
+  return standupDateRange(shiftIsoDate(today, -lookbackDays), today);
+}
+
+/** UTC calendar Monday of the week containing `now`, validated as digest `weekStart`. */
+export function utcMondayWeekStart(now: Date): string {
+  const utcDay = now.getUTCDay();
+  const offset = utcDay === 0 ? 6 : utcDay - 1;
+  const monday = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - offset),
+  );
+  const yyyy = String(monday.getUTCFullYear()).padStart(4, "0");
+  const mm = String(monday.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(monday.getUTCDate()).padStart(2, "0");
+  const iso = `${yyyy}-${mm}-${dd}`;
+  if (!isMondayUtc(iso)) {
+    throw new Error("weekStart must be a Monday (UTC calendar date)");
+  }
+  return weekStartSchema.parse(iso);
 }
 
 export function formatWorkspaceDate(isoDate: string, timezone: string): string {

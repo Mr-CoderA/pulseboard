@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "prepare": "svelte-kit sync",
     "typecheck": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "test": "tsx --test test/css-variables.test.ts test/static-routes.test.ts test/api-client.test.ts test/preview-catalog.test.ts",
+    "test": "tsx --test test/css-variables.test.ts test/static-routes.test.ts test/api-client.test.ts test/preview-catalog.test.ts test/member-session.test.ts",
     "lint": "biome check .",
     "clean": "rm -rf build .svelte-kit .tsbuild"
   },

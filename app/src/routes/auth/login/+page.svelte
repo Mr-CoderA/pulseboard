@@ -43,8 +43,8 @@ async function onsubmit(event: Event): Promise<void> {
       <form class="stack" onsubmit={onsubmit}>
         <Typography variant="display" as="h1">Sign in</Typography>
         <Typography variant="lede" as="p">
-          Short-lived session. HTTP-only cookie, SameSite=Lax. Tab cycles the fields; Enter files
-          the request.
+          Short-lived session. SameSite=None; Secure; HttpOnly cookie. Tab cycles the fields; Enter
+          files the request.
         </Typography>
 
         <div class="field">

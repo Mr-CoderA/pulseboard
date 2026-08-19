@@ -69,4 +69,47 @@ describe("API client", () => {
       },
     );
   });
+
+  it("parses GET /standups list entries with blockers and keeps credentials include", async () => {
+    const workspaceId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    const standupId = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+    const blockerId = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
+    const fetchImpl: typeof fetch = async (input, init) => {
+      assert.equal(
+        String(input),
+        `https://api.example.invalid/api/v1/standups?workspaceId=${workspaceId}&range=2026-08-17%2F2026-08-18`,
+      );
+      assert.equal(init?.method, "GET");
+      assert.equal(init?.credentials, "include");
+      return new Response(
+        JSON.stringify([
+          {
+            id: standupId,
+            userId: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+            workspaceId,
+            date: "2026-08-17",
+            yesterday: "Y",
+            today: "T",
+            rawBlockers: [{ description: "Flaky CI" }],
+            submittedAt: "2026-08-17T13:00:00.000Z",
+            blockers: [
+              {
+                id: blockerId,
+                standupId,
+                description: "Flaky CI",
+                status: "OPEN",
+                flaggedAfterDays: 2,
+                createdAt: "2026-08-17T13:00:00.000Z",
+              },
+            ],
+          },
+        ]),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    };
+    const client = createApiClient("https://api.example.invalid", undefined, fetchImpl);
+    const listed = await client.listStandups(workspaceId, "2026-08-17/2026-08-18");
+    assert.equal(listed[0]?.blockers[0]?.id, blockerId);
+    assert.equal(listed[0]?.blockers[0]?.status, "OPEN");
+  });
 });

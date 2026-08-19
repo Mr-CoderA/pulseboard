@@ -4,14 +4,14 @@ export interface CookiePolicy {
   readonly secure: boolean;
   readonly maxAgeSeconds: number;
   readonly path: "/";
-  readonly sameSite: "Lax";
+  readonly sameSite: "None";
 }
 
 export const defaultCookiePolicy: CookiePolicy = {
   secure: true,
   maxAgeSeconds: 15 * 60,
   path: "/",
-  sameSite: "Lax",
+  sameSite: "None",
 };
 
 export function serializeSessionCookie(token: string, policy: CookiePolicy): string {

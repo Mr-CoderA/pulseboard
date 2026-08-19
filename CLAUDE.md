@@ -4,7 +4,7 @@ Private npm workspace (`pulseboard`). Node `>=20` (`.nvmrc`: `20`). Package mana
 
 ## Layout
 
-- `app/` — static SvelteKit UI (`@pulseboard/app`). Canonical static paths live in `app/src/lib/routes/manifest.ts`; successful login and register `goto` `POST_AUTH_PATH` (the Atlas cover). Do not persist `AuthTokenResponse.token` in the client.
+- `app/` — static SvelteKit UI (`@pulseboard/app`). Canonical static paths live in `app/src/lib/routes/manifest.ts`; successful login and register `goto` `POST_AUTH_PATH` (the Atlas cover). Do not persist `AuthTokenResponse.token` in the client. Atlas floors (`/atlas` …) stay prerendered; live `/api/v1` hydration is browser-only via `app/src/lib/workspace/member-session.ts` after a session cookie succeeds.
 - `backend/` — Node 20 API compile target (`@pulseboard/backend`)
 - `packages/types/` — shared Zod contracts (`@pulseboard/types`)
 - Root: `turbo.json`, `biome.json`, `tsconfig.json`, `tsconfig.base.json`
@@ -51,6 +51,7 @@ Route handlers are exercised with `createMemoryStore` and an injected token secr
 - List required variable **names** in `.env.example` and `ENV_NAMES`. Never commit values. `.gitignore` ignores `.env` and `.env.*` except `.env.example`.
 - Do not invent fallback credentials, default secrets, or local service URLs in source.
 - Do not read `DATABASE_URL`, `SCHEDULER_KEY`, `BETTER_AUTH_SECRET`, or `PUBLIC_API_ORIGIN` into runtime defaults. The backend entrypoint prints names only and must not open a database or scheduler connection. The static app client refuses to fetch when `PUBLIC_API_ORIGIN` is unset. Token signing and the PostgreSQL adapter receive those values only when a caller injects them.
+- Cross-origin session cookies are `SameSite=None; Secure; HttpOnly`. The host must set at least one of `CORS_ORIGIN` / `ALLOWED_ORIGINS` / `FRONTEND_URL` / `APP_URL` to the static app origin (comma-separated, no trailing slash). Schema is applied with `npm run db:migrate` in `@pulseboard/backend`; do not call `migrate()` or `createSchedulerPort` from `main()`.
 - PostgreSQL must use `sslmode=require` when a connection is added. `assertSslModeRequire` enforces that on the URL before the adapter is constructed.
 - Do not bake secrets into build artifacts. `BETTER_AUTH_SECRET` is deploy-time signing material, not a committed key.
 

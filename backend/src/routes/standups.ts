@@ -72,7 +72,13 @@ export function registerStandupRoutes(router: Router, deps: AppDependencies): vo
         throw badRequest("range start must be on or before range end", ctx.instance);
       }
       const standups = await deps.store.listStandups(query.workspaceId, range);
-      return jsonResult(200, standupListSchema.parse(standups));
+      const entries = await Promise.all(
+        standups.map(async (standup) => ({
+          ...standup,
+          blockers: await deps.store.listBlockersForStandup(standup.id),
+        })),
+      );
+      return jsonResult(200, standupListSchema.parse(entries));
     },
   });
 

@@ -44,7 +44,7 @@ async function register(
   const payload = authTokenResponseSchema.parse(result.body);
   assert.match(result.headers["set-cookie"] ?? "", new RegExp(`^${SESSION_COOKIE_NAME}=`));
   assert.match(result.headers["set-cookie"] ?? "", /HttpOnly/);
-  assert.match(result.headers["set-cookie"] ?? "", /SameSite=Lax/);
+  assert.match(result.headers["set-cookie"] ?? "", /SameSite=None/);
   return payload.token;
 }
 
@@ -226,6 +226,12 @@ describe("standup contracts", () => {
     assert.ok(standup);
     assert.equal(standup.date, "2026-08-17");
     assert.equal(standup.rawBlockers.length, 1);
+    assert.equal(standup.blockers.length, 1);
+    const listedBlocker = standup.blockers[0];
+    assert.ok(listedBlocker);
+    assert.equal(listedBlocker.status, "OPEN");
+    assert.equal(listedBlocker.id.length, 36);
+    assert.equal(listedBlocker.standupId, standup.id);
   });
 
   it("rejects a second standup on the same workspace-local date", async () => {
