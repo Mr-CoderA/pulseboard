@@ -5,11 +5,13 @@ import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 import {
   AUTH_PATHS,
+  POST_AUTH_PATH,
   PREVIEW_WORKSPACES,
   prerenderEntriesFor,
   REQUIRED_LAYOUT_FILES,
   STATIC_PRERENDER_PATHS,
   STATIC_ROUTE_FILES,
+  workspaceCoverPath,
 } from "../src/lib/routes/manifest.js";
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -74,6 +76,26 @@ describe("static route assertions", () => {
     );
     assert.match(dashboardEntries, /export \{ entries \}/);
     assert.match(dashboardEntries, /export const prerender = true/);
+  });
+
+  it("sends successful login and register to the Atlas cover", () => {
+    assert.equal(POST_AUTH_PATH, "/atlas");
+    assert.equal(POST_AUTH_PATH, workspaceCoverPath(PREVIEW_WORKSPACES[0]));
+    assert.equal(STATIC_PRERENDER_PATHS.includes(POST_AUTH_PATH), true);
+    assert.equal(prerenderEntriesFor("atlas")[0], POST_AUTH_PATH);
+
+    const login = readFileSync(path.join(appRoot, "src/routes/auth/login/+page.svelte"), "utf8");
+    const register = readFileSync(
+      path.join(appRoot, "src/routes/auth/register/+page.svelte"),
+      "utf8",
+    );
+    for (const source of [login, register]) {
+      assert.match(source, /from "\$app\/navigation"/);
+      assert.match(source, /await goto\(POST_AUTH_PATH\)/);
+      assert.match(source, /role="alert"/);
+      assert.equal(source.includes("Session accepted. Continue to a workspace floor."), false);
+      assert.equal(source.includes("Member created. Sign in when you are ready to file."), false);
+    }
   });
 
   it("configures adapter-static with strict prerender", () => {

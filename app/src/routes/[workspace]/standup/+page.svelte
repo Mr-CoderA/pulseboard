@@ -1,5 +1,5 @@
 <script lang="ts">
-import { PUBLIC_API_ORIGIN } from "$env/static/public";
+import { env } from "$env/dynamic/public";
 import { createApiClient } from "$lib/api/client";
 import StandupForm from "$lib/components/StandupForm.svelte";
 import Typography from "$lib/components/Typography.svelte";
@@ -7,7 +7,7 @@ import { PREVIEW_NOW, type PreviewWorkspace } from "$lib/preview/catalog";
 
 let { data }: { data: { workspace: PreviewWorkspace | undefined } } = $props();
 const workspace = $derived(data.workspace);
-const client = createApiClient(PUBLIC_API_ORIGIN);
+const client = createApiClient(env.PUBLIC_API_ORIGIN);
 </script>
 
 <svelte:head>
