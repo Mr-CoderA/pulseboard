@@ -8,16 +8,13 @@ async function main(): Promise<void> {
 void main()
   .then(async () => {
     await closeDatabase();
-    process.stdout.write("database migrations applied
-");
+    console.log("database migrations applied");
   })
   .catch(async (error: unknown) => {
     await closeDatabase().catch(() => undefined);
-    process.stderr.write(
-      "database migration failed: " +
-        (error instanceof Error ? error.message : "unknown error") +
-        "
-",
+    console.error(
+      "database migration failed:",
+      error instanceof Error ? error.message : "unknown error",
     );
     process.exitCode = 1;
   });
