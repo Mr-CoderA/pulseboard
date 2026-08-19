@@ -1,11 +1,10 @@
 <script lang="ts">
-import { ENV_NAMES } from "@pulseboard/types";
-import { env } from "$env/dynamic/public";
+import { PUBLIC_API_ORIGIN } from "$env/static/public";
 import { createApiClient } from "$lib/api/client";
 import FocusTrap from "$lib/components/FocusTrap.svelte";
 import Typography from "$lib/components/Typography.svelte";
 
-const client = createApiClient(env[ENV_NAMES.PUBLIC_API_ORIGIN]);
+const client = createApiClient(PUBLIC_API_ORIGIN);
 
 let email = $state("");
 let password = $state("");

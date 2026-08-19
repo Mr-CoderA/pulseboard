@@ -1,6 +1,5 @@
 <script lang="ts">
-import { ENV_NAMES } from "@pulseboard/types";
-import { env } from "$env/dynamic/public";
+import { PUBLIC_API_ORIGIN } from "$env/static/public";
 import { createApiClient } from "$lib/api/client";
 import StandupForm from "$lib/components/StandupForm.svelte";
 import Typography from "$lib/components/Typography.svelte";
@@ -8,7 +7,7 @@ import { PREVIEW_NOW, type PreviewWorkspace } from "$lib/preview/catalog";
 
 let { data }: { data: { workspace: PreviewWorkspace | undefined } } = $props();
 const workspace = $derived(data.workspace);
-const client = createApiClient(env[ENV_NAMES.PUBLIC_API_ORIGIN]);
+const client = createApiClient(PUBLIC_API_ORIGIN);
 </script>
 
 <svelte:head>
