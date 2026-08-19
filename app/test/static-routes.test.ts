@@ -96,6 +96,12 @@ describe("static route assertions", () => {
       assert.equal(source.includes("Session accepted. Continue to a workspace floor."), false);
       assert.equal(source.includes("Member created. Sign in when you are ready to file."), false);
     }
+    assert.match(login, /SameSite=None; Secure; HttpOnly/);
+    assert.equal(login.includes("SameSite=Lax"), false);
+  });
+
+  it("ships the member workspace resolver beside adapter-static prerender", () => {
+    assert.equal(existsSync(path.join(appRoot, "src/lib/workspace/member-session.ts")), true);
   });
 
   it("configures adapter-static with strict prerender", () => {

@@ -301,8 +301,19 @@ export const weeklyDigestResponseSchema: ZodType<WeeklyDigestResponse> = z.stric
   compiledMd: markdownSchema,
 });
 
+export interface StandupListEntry extends Standup {
+  readonly blockers: Blocker[];
+}
+
+export const standupListEntrySchema: ZodType<StandupListEntry> = z.intersection(
+  standupSchema,
+  z.strictObject({
+    blockers: z.array(blockerSchema),
+  }),
+);
+
 export const workspaceListSchema: ZodType<Workspace[]> = z.array(workspaceSchema);
-export const standupListSchema: ZodType<Standup[]> = z.array(standupSchema);
+export const standupListSchema: ZodType<StandupListEntry[]> = z.array(standupListEntrySchema);
 
 export const problemDetailsSchema: ZodType<ProblemDetails> = z.object({
   type: z.string().min(1).default(PROBLEM_TYPE_BLANK),
@@ -338,7 +349,7 @@ export interface PayloadSchemaMap {
   readonly createStandupRequest: ZodType<CreateStandupRequest>;
   readonly createStandupResponse: ZodType<CreateStandupResponse>;
   readonly standupListQuery: ZodType<StandupListQuery>;
-  readonly standupList: ZodType<Standup[]>;
+  readonly standupList: ZodType<StandupListEntry[]>;
   readonly workspaceList: ZodType<Workspace[]>;
   readonly blockerStatusUpdate: ZodType<BlockerStatusUpdate>;
   readonly blockerStatusResponse: ZodType<BlockerStatusResponse>;

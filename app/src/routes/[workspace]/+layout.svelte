@@ -1,10 +1,14 @@
 <script lang="ts">
 import type { Snippet } from "svelte";
+import { onMount } from "svelte";
 import { page } from "$app/state";
+import { env } from "$env/dynamic/public";
+import { createApiClient } from "$lib/api/client";
 import Typography from "$lib/components/Typography.svelte";
 import { PREVIEW_NOW, type PreviewWorkspace } from "$lib/preview/catalog";
 import { leadSummaryPath, workspaceCoverPath, workspacePath } from "$lib/routes/manifest";
 import { windowCopy, workspaceClock } from "$lib/time/standup-window";
+import { type MemberSession, resolveMemberWorkspace } from "$lib/workspace/member-session";
 
 let { children, data }: { children: Snippet; data: { workspace: PreviewWorkspace | undefined } } =
   $props();
@@ -12,13 +16,36 @@ let { children, data }: { children: Snippet; data: { workspace: PreviewWorkspace
 const workspace = $derived(data.workspace);
 const slug = $derived(page.params.workspace ?? "");
 const path = $derived(page.url.pathname);
-const clock = $derived(
-  workspace === undefined ? undefined : workspaceClock(workspace.timezone, PREVIEW_NOW),
+
+let session = $state<MemberSession>({ kind: "anonymous" });
+let liveNow = $state<Date | undefined>(undefined);
+
+const timezone = $derived(
+  session.kind === "member" ? session.workspace.timezone : workspace?.timezone,
 );
+const clockSource = $derived(liveNow ?? PREVIEW_NOW);
+const clock = $derived(timezone === undefined ? undefined : workspaceClock(timezone, clockSource));
+const live = $derived(session.kind === "member");
 
 function current(href: string): "page" | undefined {
   return path === href || path === `${href}/` ? "page" : undefined;
 }
+
+onMount(() => {
+  const client = createApiClient(env.PUBLIC_API_ORIGIN);
+  void resolveMemberWorkspace(client).then((result) => {
+    session = result;
+    if (result.kind === "member") {
+      liveNow = new Date();
+    }
+  });
+  const tick = window.setInterval(() => {
+    if (liveNow !== undefined) {
+      liveNow = new Date();
+    }
+  }, 60_000);
+  return () => window.clearInterval(tick);
+});
 </script>
 
 {#if workspace === undefined || clock === undefined}
@@ -32,7 +59,10 @@ function current(href: string): "page" | undefined {
   <div class="page">
     <aside class="rail">
       <p class="rail-index">{workspace.slug}</p>
-      <Typography variant="kicker" as="p">{workspace.timezone}</Typography>
+      <Typography variant="kicker" as="p">{clock.timezone}</Typography>
+      {#if live}
+        <p class="live-flag">Live session</p>
+      {/if}
       <p class="type-timestamp">{clock.isoDate} · {clock.clockLabel}</p>
       <p class="window-flag" data-open={String(clock.windowOpen)}>{windowCopy(clock)}</p>
       <nav class="workspace-nav" aria-label="Workspace">
