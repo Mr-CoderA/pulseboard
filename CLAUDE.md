@@ -4,7 +4,7 @@ Private npm workspace (`pulseboard`). Node `>=20` (`.nvmrc`: `20`). Package mana
 
 ## Layout
 
-- `app/` — static SvelteKit UI (`@pulseboard/app`)
+- `app/` — static SvelteKit UI (`@pulseboard/app`). Canonical static paths live in `app/src/lib/routes/manifest.ts`; successful login and register `goto` `POST_AUTH_PATH` (the Atlas cover). Do not persist `AuthTokenResponse.token` in the client.
 - `backend/` — Node 20 API compile target (`@pulseboard/backend`)
 - `packages/types/` — shared Zod contracts (`@pulseboard/types`)
 - Root: `turbo.json`, `biome.json`, `tsconfig.json`, `tsconfig.base.json`

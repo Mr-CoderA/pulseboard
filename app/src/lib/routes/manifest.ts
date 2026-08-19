@@ -98,6 +98,9 @@ export function prerenderEntriesFor(slug: PreviewWorkspaceSlug): readonly string
 
 export const AUTH_PATHS: readonly string[] = ["/auth/login", "/auth/register"];
 
+/** Cover path of the first preview workspace; login and register navigate here after a cookie session is set. */
+export const POST_AUTH_PATH = workspaceCoverPath(PREVIEW_WORKSPACES[0]);
+
 export const STATIC_PRERENDER_PATHS: readonly string[] = [
   "/",
   ...AUTH_PATHS,

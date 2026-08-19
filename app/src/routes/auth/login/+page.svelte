@@ -1,25 +1,25 @@
 <script lang="ts">
-import { PUBLIC_API_ORIGIN } from "$env/static/public";
+import { goto } from "$app/navigation";
+import { env } from "$env/dynamic/public";
 import { createApiClient } from "$lib/api/client";
 import FocusTrap from "$lib/components/FocusTrap.svelte";
 import Typography from "$lib/components/Typography.svelte";
+import { POST_AUTH_PATH } from "$lib/routes/manifest";
 
-const client = createApiClient(PUBLIC_API_ORIGIN);
+const client = createApiClient(env.PUBLIC_API_ORIGIN);
 
 let email = $state("");
 let password = $state("");
 let error = $state<string | undefined>(undefined);
-let notice = $state<string | undefined>(undefined);
 let pending = $state(false);
 
 async function onsubmit(event: Event): Promise<void> {
   event.preventDefault();
   error = undefined;
-  notice = undefined;
   pending = true;
   try {
     await client.login({ email: email.trim(), password });
-    notice = "Session accepted. Continue to a workspace floor.";
+    await goto(POST_AUTH_PATH);
   } catch (cause) {
     error = cause instanceof Error ? cause.message : "Sign-in was rejected.";
   } finally {
@@ -76,9 +76,6 @@ async function onsubmit(event: Event): Promise<void> {
 
         {#if error}
           <p class="alert" role="alert">{error}</p>
-        {/if}
-        {#if notice}
-          <p class="alert" data-kind="ok" role="status">{notice}</p>
         {/if}
 
         <div class="actions">
