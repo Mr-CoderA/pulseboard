@@ -16,7 +16,7 @@
     "dist"
   ],
   "scripts": {
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "tsx src/db/migrate.ts",
     "generate": "tsx src/db/generate-types.ts && drizzle-kit generate",
     "schema:check": "drizzle-kit check && tsx src/db/validate-schema.ts",
     "test": "tsc -p tsconfig.test.json --pretty false && tsx --test src/auth/passwords.test.ts src/auth/tokens.test.ts src/time/workspace-date.test.ts src/scheduler/cron.test.ts src/routes/contracts.test.ts",
