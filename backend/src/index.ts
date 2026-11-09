@@ -36,10 +36,10 @@ export const processContract: ProcessContract = {
 export function describeRuntime(): string {
   return [
     "pulseboard-api",
-    "node=" + processContract.nodeTarget,
-    "prefix=" + processContract.apiPrefix,
-    "env=" + processContract.requiredEnv.join(","),
-    "tables=" + processContract.tables.join(","),
+    `node=${processContract.nodeTarget}`,
+    `prefix=${processContract.apiPrefix}`,
+    `env=${processContract.requiredEnv.join(",")}`,
+    `tables=${processContract.tables.join(",")}`,
   ].join(" ");
 }
 
@@ -81,7 +81,10 @@ function productionListener(listener: RequestListener): RequestListener {
       res.end();
       return;
     }
-    if (req.method === "GET" && (req.url === "/" || req.url === "/health" || req.url === "/api/health")) {
+    if (
+      req.method === "GET" &&
+      (req.url === "/" || req.url === "/health" || req.url === "/api/health")
+    ) {
       res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
       res.end(JSON.stringify({ status: "ok", service: "pulseboard-api" }));
       return;
@@ -107,9 +110,9 @@ async function main(): Promise<void> {
   const port = readPort();
   const server = createServer(productionListener(createNodeListener(app)));
   server.listen(port, "0.0.0.0", () => {
-    process.stdout.write(describeRuntime() + "\n");
-    process.stdout.write("listening=0.0.0.0:" + String(port) + "\n");
-    process.stdout.write("database-env=" + ENV_NAMES.DATABASE_URL + "\n");
+    process.stdout.write(`${describeRuntime()}\n`);
+    process.stdout.write(`listening=0.0.0.0:${String(port)}\n`);
+    process.stdout.write(`database-env=${ENV_NAMES.DATABASE_URL}\n`);
   });
 
   const shutdown = (): void => {
@@ -123,7 +126,9 @@ async function main(): Promise<void> {
 
 if (isDirectEntrypoint(process.argv[1], import.meta.url)) {
   void main().catch((error: unknown) => {
-    process.stderr.write("startup failed: " + (error instanceof Error ? error.message : "unknown error") + "\n");
+    process.stderr.write(
+      `startup failed: ${error instanceof Error ? error.message : "unknown error"}\n`,
+    );
     process.exitCode = 1;
   });
 }
@@ -142,7 +147,12 @@ export { assertSslModeRequire, resolveDatabaseUrl } from "./db/ssl.js";
 export { type App, type AppDependencies, createApp, type IncomingDispatch } from "./http/app.js";
 export { readAuthSecret } from "./http/errors.js";
 export { createNodeListener } from "./http/node.js";
-export { createSchedulerPort, readSchedulerConfig, SCHEDULER_JOBS, type SchedulerPort } from "./scheduler/cron.js";
+export {
+  createSchedulerPort,
+  readSchedulerConfig,
+  SCHEDULER_JOBS,
+  type SchedulerPort,
+} from "./scheduler/cron.js";
 export { createMemoryStore, MemoryStore } from "./store/memory.js";
 export type { Store } from "./store/port.js";
 export { calendarDateInZone } from "./time/workspace-date.js";
